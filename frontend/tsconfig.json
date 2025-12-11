@@ -1,0 +1,65 @@
+{
+  "compilerOptions": {
+    // Target modern JavaScript for better performance
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    
+    // Allow JavaScript files
+    "allowJs": true,
+    
+    // Skip type checking of declaration files for faster compilation
+    "skipLibCheck": true,
+    
+    // Enable strict type checking
+    "strict": true,
+    
+    // Next.js handles compilation, so we don't emit
+    "noEmit": true,
+    
+    // Enable interoperability with CommonJS modules
+    "esModuleInterop": true,
+    
+    // Use modern module system
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    
+    // Allow importing JSON modules
+    "resolveJsonModule": true,
+    
+    // Required for Babel compatibility
+    "isolatedModules": true,
+    
+    // Preserve JSX for Next.js to handle
+    "jsx": "preserve",
+    
+    // Enable incremental compilation for faster rebuilds
+    "incremental": true,
+    
+    // Next.js TypeScript plugin
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    
+    // Path aliases for cleaner imports
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/store/*": ["./src/store/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+

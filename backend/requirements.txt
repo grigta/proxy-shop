@@ -1,0 +1,38 @@
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6  # Required by FastAPI for form data and file uploads
+
+# Database
+sqlalchemy[asyncio]==2.0.23
+asyncpg==0.29.0
+alembic==1.13.0
+
+# Validation & Configuration
+pydantic[email]==2.5.2
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# Security (for future features)
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Telegram Bot
+aiogram==3.2.0  # Telegram bot framework
+Babel==2.13.1  # i18n support (gettext/Babel for translations)
+redis==5.0.1  # Python client for Redis (async/sync - replaces aioredis)
+
+# HTTP Client (for future API integrations)
+httpx==0.25.2  # Async HTTP client for external API calls (cryptocurrencyapi.net)
+aiohttp==3.9.1  # Alternative async HTTP client
+
+# Proxy Validation
+aiohttp-socks==0.8.4  # Library for checking SOCKS5/SOCKS4 proxy status via aiohttp (async)
+python-socks[asyncio]==2.4.3  # Low-level library for SOCKS protocol support
+
+# QR Code Generation
+qrcode[pil]==7.4.2  # Library for generating QR codes with PIL/Pillow support
+Pillow==10.1.0  # Image processing library (required for qrcode to render images)
+
+# Background Scheduler
+apscheduler==3.10.4  # Background job scheduler for automatic proxy sync

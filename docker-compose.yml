@@ -1,0 +1,243 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: proxy_shop_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy-shop-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: proxy_shop_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - proxy-shop-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: proxy_shop_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy-shop-network
+
+  backend:
+    image: python:3.11-slim
+    container_name: proxy_shop_backend
+    working_dir: /app
+    command: sh -c "apt-get update && apt-get install -y curl && pip install -r requirements.txt && uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./backend/requirements.txt:/app/requirements.txt
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      WEB_BASE_URL: ${WEB_BASE_URL}
+      BACKEND_API_URL: http://backend:8000
+      REDIS_URL: redis://redis:6379/0
+      # Heleket Payment Configuration
+      HELEKET_MERCHANT_UUID: ${HELEKET_MERCHANT_UUID}
+      HELEKET_API_KEY: ${HELEKET_API_KEY}
+      HELEKET_WEBHOOK_URL: ${HELEKET_WEBHOOK_URL}
+      # External SOCKS API Configuration
+      EXTERNAL_SOCKS_API_TOKEN: telegram-bot-nik
+      EXTERNAL_SOCKS_API_URL: https://elusive.sh/api/v1/authorized
+      EXTERNAL_SOCKS_API_TIMEOUT: 30
+      EXTERNAL_SOCKS_PRICE: 2.00
+      EXTERNAL_SOCKS_SYNC_INTERVAL_MINUTES: 5
+      # Legacy Crypto API Configuration (DEPRECATED)
+      CRYPTO_API_KEY: ${CRYPTO_API_KEY}
+      CRYPTO_API_IPN_SECRET: ${CRYPTO_API_IPN_SECRET}
+      IPN_WEBHOOK_URL: ${IPN_WEBHOOK_URL}
+      USDT_TRC20_MAIN_WALLET: ${USDT_TRC20_MAIN_WALLET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - proxy-shop-network
+
+  bot:
+    image: python:3.11-slim
+    container_name: proxy_shop_bot
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python -m bot.main"
+    volumes:
+      - ./bot:/app/bot
+      - ./backend/requirements.txt:/app/requirements.txt
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BACKEND_API_URL: http://backend:8000
+      REDIS_URL: redis://redis:6379/0
+      LOG_LEVEL: ${LOG_LEVEL}
+      WEBHOOK_MODE: ${WEBHOOK_MODE}
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - proxy-shop-network
+
+  # ============================================================================
+  # OLD NEXT.JS FRONTEND - DEPRECATED
+  # ============================================================================
+  # The old Next.js frontend has been replaced by the new Vite frontend below.
+  # This service is kept commented for potential rollback.
+  # To use the old frontend, uncomment this service and comment out new-frontend.
+  # ============================================================================
+  
+  # frontend:
+  #   image: node:20-alpine
+  #   container_name: proxy_shop_frontend
+  #   working_dir: /app
+  #   command: sh -c "npm install && npm run dev"
+  #   volumes:
+  #     - ./frontend:/app
+  #     # Anonymous volumes to prevent overwriting node_modules and .next cache
+  #     - /app/node_modules
+  #     - /app/.next
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     # Public variables (accessible in browser)
+  #     NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+  #     NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+  #     # Server-side backend URL (internal Docker network)
+  #     BACKEND_API_URL: http://backend:8000
+  #     NODE_ENV: ${NODE_ENV}
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
+  #   networks:
+  #     - proxy-shop-network
+  #   restart: unless-stopped
+
+  # ============================================================================
+  # NEW VITE FRONTEND - Modern React 19 Web Interface (CURRENT)
+  # ============================================================================
+  # This is the new frontend built with Vite 6 + React 19 for improved
+  # performance and developer experience.
+  # 
+  # Features:
+  # - Lightning-fast hot module replacement
+  # - Smaller bundle size
+  # - React 19 with improved performance
+  # - Same port (3000) as old frontend for seamless migration
+  #
+  # For detailed documentation, see: new-frontend/README.md
+  # ============================================================================
+  
+  new-frontend:
+    image: node:20-alpine
+    container_name: proxy_shop_new_frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./new-frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      # Reuse existing environment variables for backward compatibility
+      VITE_API_URL: ${NEXT_PUBLIC_API_URL}
+      VITE_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # PRODUCTION BUILD OPTION (commented out for development)
+  # ============================================================================
+  # For production, use the Dockerfile to build an optimized nginx-served image:
+  #
+  # new-frontend:
+  #   build:
+  #     context: ./new-frontend
+  #     dockerfile: Dockerfile
+  #     args:
+  #       VITE_API_URL: ${NEXT_PUBLIC_API_URL}
+  #       VITE_APP_URL: ${NEXT_PUBLIC_APP_URL}
+  #   container_name: proxy_shop_new_frontend
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
+  #   networks:
+  #     - proxy-shop-network
+  #   restart: unless-stopped
+  # ============================================================================
+
+  # Vite Admin Panel - Modern React Admin Interface (Production Mode)
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://23.95.132.61:8000
+    container_name: proxy_shop_admin
+    ports:
+      - "3001:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: proxy_shop_postgres_data
+  redis_data:
+    name: proxy_shop_redis_data
+
+networks:
+  proxy-shop-network:
+    name: proxy_shop_network
+    driver: bridge

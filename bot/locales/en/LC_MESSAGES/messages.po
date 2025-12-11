@@ -1,0 +1,204 @@
+# English translations for USE.NET Proxy Shop Bot
+# Copyright (C) 2025
+# This file is distributed under the same license as the project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: USE.NET Proxy Shop Bot 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-12 12:00+0000\n"
+"PO-Revision-Date: 2025-11-12 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Access code messages
+msgid "Код доступа"
+msgstr "Access Code"
+
+msgid "🔑 <b>Ваш код доступа:</b> <code>{access_code}</code>\n💡 Сохраните этот код - он работает на всех платформах!\n\n"
+msgstr "🔑 <b>Your access code:</b> <code>{access_code}</code>\n💡 Save this code - it works on all platforms!\n\n"
+
+msgid "Используйте этот код для входа на веб-сайте и в админ-панели"
+msgstr "Use this code to login on the website and admin panel"
+
+msgid "Ошибка при загрузке профиля. Используйте /start для повторной авторизации"
+msgstr "Error loading profile. Use /start to re-authenticate"
+
+# Common messages
+msgid "НАЗАД"
+msgstr "BACK"
+
+msgid "ГЛАВНОЕ МЕНЮ"
+msgstr "MAIN MENU"
+
+# Menu items
+msgid "👤 АККАУНТ"
+msgstr "👤 ACCOUNT"
+
+msgid "🧦 SOCKS5"
+msgstr "🧦 SOCKS5"
+
+msgid "🔐 PPTP"
+msgstr "🔐 PPTP"
+
+msgid "💬 ПОДДЕРЖКА"
+msgstr "💬 SUPPORT"
+
+msgid "📜 ПРАВИЛА"
+msgstr "📜 RULES"
+
+# Account messages
+msgid "💰 ПОПОЛНИТЬ БАЛАНС"
+msgstr "💰 DEPOSIT"
+
+msgid "📊 ИСТОРИЯ АККАУНТА"
+msgstr "📊 ACCOUNT HISTORY"
+
+msgid "Balance"
+msgstr "Balance"
+
+msgid "Покупка совершена успешно!"
+msgstr "Purchase successful!"
+
+msgid "ID Покупки"
+msgstr "Purchase ID"
+
+msgid "Цена"
+msgstr "Price"
+
+msgid "Страна"
+msgstr "Country"
+
+msgid "Штат"
+msgstr "State"
+
+msgid "Город"
+msgstr "City"
+
+msgid "Регион"
+msgstr "Region"
+
+msgid "ЗИП"
+msgstr "ZIP"
+
+msgid "Прокси"
+msgstr "Proxy"
+
+# Payment messages
+msgid "Минимальное пополнение"
+msgstr "Minimum deposit"
+
+msgid "Монета"
+msgstr "Coin"
+
+msgid "Сеть"
+msgstr "Network"
+
+msgid "Адрес"
+msgstr "Address"
+
+msgid "Вы можете отсканировать qr что бы автоматически вставить адрес, но при этом рекомендуется все равно перепроверить все."
+msgstr "You can scan the QR code to automatically insert the address, but it is recommended to double-check everything."
+
+msgid "Your payment was successful"
+msgstr "Your payment was successful"
+
+msgid "Information about the deposit"
+msgstr "Information about the deposit"
+
+msgid "Currency"
+msgstr "Currency"
+
+msgid "amount"
+msgstr "amount"
+
+msgid "Date of replenishment"
+msgstr "Date of replenishment"
+
+# Proxy messages
+msgid "Скорость"
+msgstr "Speed"
+
+msgid "Добавлено"
+msgstr "Added"
+
+msgid "штат"
+msgstr "state"
+
+msgid "регион"
+msgstr "region"
+
+msgid "Прокси онлайн!"
+msgstr "Proxy is online!"
+
+msgid "Прокси офлайн!"
+msgstr "Proxy is offline!"
+
+msgid "С момента покупки прошло"
+msgstr "Time since purchase"
+
+msgid "REFOUND"
+msgstr "REFUND"
+
+msgid "GARANTY GONE"
+msgstr "WARRANTY EXPIRED"
+
+msgid "Данного региона нет в списке прокси"
+msgstr "This region is not in the proxy list"
+
+msgid "К сожалению в списке прокси текущего города нет.\\nПопробуйте ближайший прокси или другие настройки."
+msgstr "Unfortunately, there are no proxies in the current city.\\nTry a nearby proxy or other settings."
+
+msgid "К сожалению в списке прокси текущего ZIP нет.\\nПопробуйте ближайший прокси или другие настройки."
+msgstr "Unfortunately, there are no proxies with the current ZIP.\\nTry a nearby proxy or other settings."
+
+msgid "Посмотреть другие варианты"
+msgstr "See other options"
+
+msgid "📋 ПОКАЗАТЬ ЕЩЕ"
+msgstr "📋 SHOW MORE"
+
+msgid "✅ ПРОВЕРКА НА ВАЛИД"
+msgstr "✅ CHECK VALIDITY"
+
+msgid "🔄 ПРОДЛИТЬ ПРОКСИ"
+msgstr "🔄 EXTEND PROXY"
+
+msgid "price"
+msgstr "price"
+
+# Error messages
+msgid "Ошибка при загрузке профиля"
+msgstr "Error loading profile"
+
+msgid "Ошибка при загрузке профиля. Попробуйте /start"
+msgstr "Error loading profile. Try /start"
+
+msgid "Ошибка при загрузке истории"
+msgstr "Error loading history"
+
+msgid "Ошибка при загрузке прокси"
+msgstr "Error loading proxies"
+
+msgid "Ошибка"
+msgstr "Error"
+
+msgid "Попробуйте еще раз, или напишите в поддержку"
+msgstr "Try again or contact support"
+
+# Validation messages
+msgid "Отправьте ID прокси для проверки"
+msgstr "Send proxy ID for validation"
+
+msgid "Для продления отправьте proxy_id"
+msgstr "Send proxy_id to extend"
+
+msgid "успешно продлен"
+msgstr "successfully extended"
+
+msgid "ушел в офлайн, продление невозможно"
+msgstr "went offline, extension impossible"

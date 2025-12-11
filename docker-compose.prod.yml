@@ -1,0 +1,168 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: proxy_shop_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: proxy_shop_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: proxy_shop_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: proxy-shop-backend:latest
+    container_name: proxy_shop_backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      WEB_BASE_URL: ${WEB_BASE_URL}
+      BACKEND_API_URL: http://backend:8000
+      REDIS_URL: redis://redis:6379/0
+      # Heleket Payment Configuration
+      HELEKET_MERCHANT_UUID: ${HELEKET_MERCHANT_UUID}
+      HELEKET_API_KEY: ${HELEKET_API_KEY}
+      HELEKET_WEBHOOK_URL: ${HELEKET_WEBHOOK_URL}
+      # External SOCKS API Configuration
+      EXTERNAL_SOCKS_API_TOKEN: ${EXTERNAL_SOCKS_API_TOKEN}
+      EXTERNAL_SOCKS_API_URL: ${EXTERNAL_SOCKS_API_URL}
+      EXTERNAL_SOCKS_API_TIMEOUT: ${EXTERNAL_SOCKS_API_TIMEOUT}
+      EXTERNAL_SOCKS_PRICE: ${EXTERNAL_SOCKS_PRICE}
+      EXTERNAL_SOCKS_SYNC_INTERVAL_MINUTES: ${EXTERNAL_SOCKS_SYNC_INTERVAL_MINUTES}
+      # Legacy Crypto API Configuration (DEPRECATED)
+      CRYPTO_API_KEY: ${CRYPTO_API_KEY}
+      CRYPTO_API_IPN_SECRET: ${CRYPTO_API_IPN_SECRET}
+      IPN_WEBHOOK_URL: ${IPN_WEBHOOK_URL}
+      USDT_TRC20_MAIN_WALLET: ${USDT_TRC20_MAIN_WALLET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    image: proxy-shop-bot:latest
+    container_name: proxy_shop_bot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BACKEND_API_URL: http://backend:8000
+      REDIS_URL: redis://redis:6379/0
+      LOG_LEVEL: ${LOG_LEVEL}
+      WEBHOOK_MODE: ${WEBHOOK_MODE}
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  new-frontend:
+    build:
+      context: ./new-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL}
+        VITE_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    image: proxy-shop-frontend:latest
+    container_name: proxy_shop_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: proxy-shop-admin:latest
+    container_name: proxy_shop_admin
+    ports:
+      - "3001:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - proxy-shop-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: proxy_shop_postgres_data
+  redis_data:
+    name: proxy_shop_redis_data
+
+networks:
+  proxy-shop-network:
+    name: proxy_shop_network
+    driver: bridge

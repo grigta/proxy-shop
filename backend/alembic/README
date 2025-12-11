@@ -1,0 +1,55 @@
+# Alembic Database Migrations
+
+## Основные команды
+
+### 1. Создание новой миграции (autogenerate)
+```bash
+alembic revision --autogenerate -m "Initial migration"
+```
+
+### 2. Применение всех миграций
+```bash
+alembic upgrade head
+```
+
+### 3. Откат последней миграции
+```bash
+alembic downgrade -1
+```
+
+### 4. Просмотр истории миграций
+```bash
+alembic history
+```
+
+### 5. Просмотр текущей версии БД
+```bash
+alembic current
+```
+
+## Важные замечания
+
+- Всегда проверяйте сгенерированные миграции перед применением
+- Для production используйте только миграции, никогда не используйте `Base.metadata.create_all()`
+- Перед созданием миграции убедитесь, что все модели импортированы в `models/__init__.py`
+- Для async операций в миграциях используйте `op.execute()`
+
+## Первая миграция
+
+```bash
+# Создание первой миграции со всеми таблицами
+alembic revision --autogenerate -m "Create all tables with access_code system"
+
+# Применение миграции к БД
+alembic upgrade head
+```
+
+## Структура директории
+
+```
+alembic/
+├── versions/       # Файлы миграций (генерируются автоматически)
+├── env.py         # Конфигурация окружения для async миграций
+├── script.py.mako # Шаблон для генерации новых миграций
+└── README         # Этот файл
+```

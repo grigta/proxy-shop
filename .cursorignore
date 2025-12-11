@@ -1,0 +1,6 @@
+# Allow editing .env files
+!.env
+!.env.*
+!**/.env
+!**/.env.*
+

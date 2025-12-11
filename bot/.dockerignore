@@ -1,0 +1,48 @@
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Documentation
+README.md
+*.md
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# Tests
+tests/
+test_*.py
+*_test.py
+
+# Don't ignore compiled translations
+!bot/locales/**/*.mo

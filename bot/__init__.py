@@ -1,0 +1,2 @@
+"""Proxy Shop Telegram Bot"""
+
