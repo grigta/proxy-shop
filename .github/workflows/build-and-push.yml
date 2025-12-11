@@ -83,6 +83,35 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Копируем .env файл из GitHub Secrets на сервер
+      - name: Copy .env file to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            mkdir -p ${{ secrets.PROJECT_PATH || '~/proxy-shop' }}
+            cat > ${{ secrets.PROJECT_PATH || '~/proxy-shop' }}/.env << 'ENVEOF'
+            ${{ secrets.ENV_FILE }}
+            ENVEOF
+            echo "✅ .env файл обновлён"
+
+      # Копируем docker-compose.ghcr.yml на сервер
+      - name: Copy docker-compose to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "docker-compose.ghcr.yml,deploy.sh"
+          target: ${{ secrets.PROJECT_PATH || '~/proxy-shop' }}
+
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -93,7 +122,10 @@ jobs:
           script: |
             cd ${{ secrets.PROJECT_PATH || '~/proxy-shop' }}
             
-            # Логин в GHCR (если нужно)
+            # Делаем скрипт исполняемым
+            chmod +x deploy.sh
+            
+            # Логин в GHCR
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # Скачиваем новые образы

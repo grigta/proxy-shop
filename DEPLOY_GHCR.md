@@ -57,6 +57,18 @@ GitHub Actions включены по умолчанию. Убедитесь, ч�
 | `SERVER_PORT` | Порт SSH (опционально) | `22` |
 | `PROJECT_PATH` | Путь к проекту (опционально) | `/root/proxy-shop` |
 | `GHCR_TOKEN` | GitHub PAT с правами `read:packages` | `ghp_xxxx...` |
+| `ENV_FILE` | **Весь .env файл целиком** | См. ниже |
+
+#### Как добавить ENV_FILE (весь .env в GitHub Secrets):
+
+1. Откройте ваш текущий `.env` файл
+2. Скопируйте **всё содержимое**
+3. В GitHub: **Settings → Secrets → New repository secret**
+4. Name: `ENV_FILE`
+5. Value: вставьте весь .env файл
+6. Нажмите **Add secret**
+
+⚠️ **Важно:** При изменении конфигурации — обновите секрет `ENV_FILE` в GitHub, и при следующем деплое новый .env автоматически скопируется на сервер.
 
 #### Как создать SSH ключ для деплоя:
 
@@ -90,31 +102,34 @@ cat ~/.ssh/github_deploy
 
 ## Деплой на новый сервер
 
-### Быстрый старт
+### Быстрый старт (автоматический)
+
+Если секреты настроены в GitHub — просто установите Docker на сервере:
 
 ```bash
-# 1. Клонируйте репозиторий (или скачайте только нужные файлы)
-git clone https://github.com/<owner>/proxy-shop.git
-cd proxy-shop
+# 1. Установка Docker
+curl -fsSL https://get.docker.com | sh
 
-# 2. Запустите настройку
-./deploy.sh setup
+# 2. Установка Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-# 3. Отредактируйте .env файл
-nano .env
-
-# 4. Запустите сервисы
-./deploy.sh up
+# 3. Создайте папку проекта
+mkdir -p ~/proxy-shop
 ```
 
-### Пошаговая инструкция
+После этого **обновите секреты в GitHub** (`SERVER_HOST`, `SSH_PRIVATE_KEY`) и сделайте любой пуш в main — всё остальное произойдёт автоматически:
+- ✅ .env скопируется из `ENV_FILE` секрета
+- ✅ docker-compose.ghcr.yml скопируется
+- ✅ Образы скачаются и запустятся
+
+### Ручная установка (если нужно)
 
 #### Шаг 1: Установка Docker
 
 ```bash
 # Ubuntu/Debian
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
 # Установка Docker Compose
@@ -127,13 +142,6 @@ exit
 
 #### Шаг 2: Получение файлов
 
-Вариант A - Клонирование репозитория:
-```bash
-git clone https://github.com/<owner>/proxy-shop.git
-cd proxy-shop
-```
-
-Вариант B - Скачивание только нужных файлов:
 ```bash
 mkdir proxy-shop && cd proxy-shop
 
@@ -145,41 +153,16 @@ curl -O https://raw.githubusercontent.com/<owner>/proxy-shop/main/.env.example
 chmod +x deploy.sh
 ```
 
-#### Шаг 3: Авторизация в GHCR
+#### Шаг 3: Настройка
 
 ```bash
-# Создайте Personal Access Token на GitHub:
-# https://github.com/settings/tokens/new?scopes=read:packages
-
-# Залогиньтесь в GHCR
-echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+./deploy.sh setup
 ```
 
-#### Шаг 4: Настройка окружения
+#### Шаг 4: Запуск
 
 ```bash
-# Создайте .env из примера
-cp .env.example .env
-
-# Добавьте GHCR настройки
-echo "GHCR_OWNER=your-github-username" >> .env
-echo "IMAGE_TAG=latest" >> .env
-
-# Отредактируйте остальные переменные
-nano .env
-```
-
-#### Шаг 5: Запуск
-
-```bash
-# Скачайте образы
-./deploy.sh pull
-
-# Запустите сервисы
 ./deploy.sh up
-
-# Проверьте статус
-./deploy.sh status
 ```
 
 ## Команды deploy.sh

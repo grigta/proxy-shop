@@ -147,3 +147,5 @@ networks:
     name: proxy_shop_network
     driver: bridge
 
+
+
